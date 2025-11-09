@@ -10,6 +10,9 @@
 ![Last Updated](https://img.shields.io/badge/Last%20Updated-November%202025-purple)
 ![Project Type](https://img.shields.io/badge/Project-From%20Scratch%20Implementation-brown)
 
+### 🧠 Meaning of the Name
+> *Letter-Forge* symbolizes both the ancient craft of shaping written language  
+> and the modern act of building models that learn linguistic structure from scratch.
 
 > *A forge where letters learn to think.*
 
