@@ -6,6 +6,7 @@ import numpy as np
 from utils import *
 from transformer import *
 
+
 ####################################################
 # DO NOT MODIFY THIS FILE IN YOUR FINAL SUBMISSION #
 ####################################################
