@@ -1,0 +1,38 @@
+{
+  "hparams": {
+    "d_model": 64,
+    "d_internal": 64,
+    "num_layers": 2,
+    "epochs": 5,
+    "lr": 0.001,
+    "seed": 42
+  },
+  "final_dev_acc": 0.99525,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 2451.63085102709,
+      "dev_acc": 0.96895
+    },
+    {
+      "epoch": 2,
+      "train_loss": 1175.6289710993879,
+      "dev_acc": 0.96765
+    },
+    {
+      "epoch": 3,
+      "train_loss": 889.1469081223477,
+      "dev_acc": 0.9832
+    },
+    {
+      "epoch": 4,
+      "train_loss": 673.4490843744134,
+      "dev_acc": 0.98685
+    },
+    {
+      "epoch": 5,
+      "train_loss": 482.3055992085574,
+      "dev_acc": 0.99525
+    }
+  ]
+}
