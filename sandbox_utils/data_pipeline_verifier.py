@@ -4,7 +4,7 @@
 
 import torch
 from torch.utils.data import Dataset, DataLoader
-from utils import Indexer
+from part_1_encoder.utils import Indexer
 import numpy as np
 import os
 
@@ -129,7 +129,7 @@ def check_model_interface(model, loader):
 # ------------------------------------------------------------------
 if __name__ == "__main__":
     vocab, vocab_index = build_vocab_indexer()
-    train_path = "data/lettercounting-train.txt"
+    train_path = "../data/lettercounting-train.txt"
 
     if not os.path.exists(train_path):
         print("⚠️  Please place the train/dev files under data/")

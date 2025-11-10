@@ -1,7 +1,6 @@
 # letter_counting.py
 
 import argparse
-import json
 import time
 import numpy as np
 from utils import *

@@ -2,7 +2,7 @@
 # Self-Attention Verification (Evaluation-mode Testing)
 
 import torch
-from transformer import TransformerLayer, make_causal_mask
+from part_1_encoder.transformer import TransformerLayer, make_causal_mask
 
 def _attention_sanity_tests():
     """
