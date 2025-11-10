@@ -8,7 +8,11 @@ import random
 from torch import optim
 import matplotlib.pyplot as plt
 from typing import List
-from part_1_encoder.utils import *
+try:
+    from part_1_encoder.utils import *
+except ImportError:
+    from utils import *
+
 
 import torch.nn.functional as F
 import math
@@ -169,18 +173,29 @@ def train_classifier(args, train, dev,
       - trains with NLLLoss on unbatched examples
       - logs per-epoch loss + dev accuracy
       - saves best checkpoint (by dev acc) and run metadata JSON
+      - supports environment variable overrides for hyperparameter experiments
     """
-    # Repro
-    random.seed(seed); np.random.seed(seed); torch.manual_seed(seed)
+    # Allow environment variable overrides for experiments (Member-4)
+    d_model    = int(os.getenv("LF_D_MODEL", d_model))
+    d_internal = int(os.getenv("LF_D_INTERNAL", d_internal if d_internal is not None else d_model))
+    num_layers = int(os.getenv("LF_LAYERS", num_layers))
+    epochs     = int(os.getenv("LF_EPOCHS", epochs))
+    lr         = float(os.getenv("LF_LR", lr))
+
+    # Reproducibility
+    random.seed(seed)
+    np.random.seed(seed)
+    torch.manual_seed(seed)
 
     # Spec constants for Part-1
     num_positions = 20
     num_classes   = 3
     vocab_size    = 27
 
-    # Ensure output dir exists (relative to current working directory)
+    # Ensure output dir exists
     os.makedirs(save_dir, exist_ok=True)
 
+    # Build model
     model = Transformer(
         vocab_size=vocab_size,
         num_positions=num_positions,
@@ -196,6 +211,9 @@ def train_classifier(args, train, dev,
     best_acc = -1.0
     history = []
 
+    # ---------------------------
+    # Training loop
+    # ---------------------------
     for epoch in range(1, epochs + 1):
         model.train()
         ex_idxs = list(range(len(train)))
@@ -212,7 +230,7 @@ def train_classifier(args, train, dev,
             optimizer.step()
             train_loss_epoch += loss.item()
 
-        # Inline dev accuracy (no helper defs)
+        # Compute dev accuracy
         model.eval()
         correct, total = 0, 0
         with torch.no_grad():
@@ -226,7 +244,7 @@ def train_classifier(args, train, dev,
         history.append({"epoch": epoch, "train_loss": train_loss_epoch, "dev_acc": dev_acc})
         print(f"[epoch {epoch}/{epochs}] loss={train_loss_epoch:.4f}  dev_acc={dev_acc:.4f}")
 
-        # Save best-by-dev
+        # Save best checkpoint
         if dev_acc > best_acc:
             best_acc = dev_acc
             torch.save(model.state_dict(), os.path.join(save_dir, "model_part1_best.pt"))
@@ -234,8 +252,12 @@ def train_classifier(args, train, dev,
     # Save run metadata
     meta = {
         "hparams": {
-            "d_model": d_model, "d_internal": d_internal, "num_layers": num_layers,
-            "epochs": epochs, "lr": lr, "seed": seed
+            "d_model": d_model,
+            "d_internal": d_internal,
+            "num_layers": num_layers,
+            "epochs": epochs,
+            "lr": lr,
+            "seed": seed
         },
         "final_dev_acc": best_acc,
         "history": history,
@@ -243,12 +265,14 @@ def train_classifier(args, train, dev,
     with open(os.path.join(save_dir, "run_meta_part1.json"), "w") as f:
         json.dump(meta, f, indent=2)
 
+    # Reload best checkpoint before returning
     best_path = os.path.join(save_dir, "model_part1_best.pt")
     if os.path.exists(best_path):
         model.load_state_dict(torch.load(best_path, map_location="cpu"))
 
     model.eval()
     return model
+
 
 
 

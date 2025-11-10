@@ -1,0 +1,53 @@
+{
+  "hparams": {
+    "d_model": 128,
+    "d_internal": 128,
+    "num_layers": 2,
+    "epochs": 8,
+    "lr": 0.0008,
+    "seed": 42
+  },
+  "final_dev_acc": 0.9039,
+  "history": [
+    {
+      "epoch": 1,
+      "train_loss": 3916.9485685154796,
+      "dev_acc": 0.89335
+    },
+    {
+      "epoch": 2,
+      "train_loss": 2866.577031739056,
+      "dev_acc": 0.9039
+    },
+    {
+      "epoch": 3,
+      "train_loss": 2939.9819565657526,
+      "dev_acc": 0.87675
+    },
+    {
+      "epoch": 4,
+      "train_loss": 3794.085615169257,
+      "dev_acc": 0.86085
+    },
+    {
+      "epoch": 5,
+      "train_loss": 4096.059197500348,
+      "dev_acc": 0.8493
+    },
+    {
+      "epoch": 6,
+      "train_loss": 4309.847933772951,
+      "dev_acc": 0.81265
+    },
+    {
+      "epoch": 7,
+      "train_loss": 4570.116913273931,
+      "dev_acc": 0.8457
+    },
+    {
+      "epoch": 8,
+      "train_loss": 4593.9204548969865,
+      "dev_acc": 0.8304
+    }
+  ]
+}
