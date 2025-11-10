@@ -5,7 +5,7 @@ from torch import nn, optim
 
 SEED = 42
 random.seed(SEED); np.random.seed(SEED); torch.manual_seed(SEED)
-os.makedirs("../artifacts", exist_ok=True); os.makedirs("../plots", exist_ok=True)
+os.makedirs("../artifacts", exist_ok=True); os.makedirs("../part_1_encoder/plots", exist_ok=True)
 
 # 1) Data
 v, idx = build_vocab_indexer()
