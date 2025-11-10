@@ -6,7 +6,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
-from data_pipeline_verifier import build_vocab_indexer, build_dataloader
+from sandbox_utils.data_pipeline_verifier import build_vocab_indexer, build_dataloader
 
 # ===== Constants =====
 SEQ_LEN = 20
@@ -18,7 +18,7 @@ BATCH_SIZE = 8
 # ===== Data batch helper =====
 def get_batch():
     v, idx = build_vocab_indexer()
-    loader = build_dataloader("data/lettercounting-train.txt", idx, task="BEFORE", batch_size=BATCH_SIZE)
+    loader = build_dataloader("../data/lettercounting-train.txt", idx, task="BEFORE", batch_size=BATCH_SIZE)
     xb, yb = next(iter(loader))
     assert xb.shape == (BATCH_SIZE, SEQ_LEN), f"inputs shape {xb.shape}"
     assert yb.shape == (BATCH_SIZE, SEQ_LEN), f"labels shape {yb.shape}"
@@ -179,7 +179,7 @@ def _mini_transformer_with_pe_test(learned=False):
             return h, A
 
     v, idx = build_vocab_indexer()
-    loader = build_dataloader("data/lettercounting-train.txt", idx, batch_size=8)
+    loader = build_dataloader("../data/lettercounting-train.txt", idx, batch_size=8)
     xb, _ = next(iter(loader))
     model = _Mini(vocab_size=len(idx), d_model=64, learned_pe=learned)
     y, A = model(xb)
@@ -192,7 +192,7 @@ def _mini_transformer_with_pe_test(learned=False):
 def _mini_transformer_end_to_end_test():
     """End-to-end integration test: embedding + PE + TransformerLayer (your tested layer)."""
     v, idx = build_vocab_indexer()
-    loader = build_dataloader("data/lettercounting-train.txt", idx, batch_size=8)
+    loader = build_dataloader("../data/lettercounting-train.txt", idx, batch_size=8)
     xb, _ = next(iter(loader))
 
     model = MiniTransformer(vocab_size=len(idx), d_model=64)

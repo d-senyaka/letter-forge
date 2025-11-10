@@ -1,17 +1,16 @@
 import json, torch, random, numpy as np, os
-from data_pipeline_verifier import build_vocab_indexer, build_dataloader
-from transformer import Transformer
+from sandbox_utils.data_pipeline_verifier import build_vocab_indexer, build_dataloader
+from part_1_encoder.transformer import Transformer
 from torch import nn, optim
-import torch.nn.functional as F
 
 SEED = 42
 random.seed(SEED); np.random.seed(SEED); torch.manual_seed(SEED)
-os.makedirs("artifacts", exist_ok=True); os.makedirs("plots", exist_ok=True)
+os.makedirs("../part_1_encoder/artifacts", exist_ok=True); os.makedirs("../part_1_encoder/plots", exist_ok=True)
 
 # 1) Data
 v, idx = build_vocab_indexer()
-train = build_dataloader("data/lettercounting-train.txt", idx, batch_size=1, shuffle=False)
-dev   = build_dataloader("data/lettercounting-dev.txt", idx, batch_size=1, shuffle=False)
+train = build_dataloader("../data/lettercounting-train.txt", idx, batch_size=1, shuffle=False)
+dev   = build_dataloader("../data/lettercounting-dev.txt", idx, batch_size=1, shuffle=False)
 
 # 2) Model
 model = Transformer(vocab_size=27, num_positions=20, d_model=64, d_internal=64, num_classes=3, num_layers=1)
@@ -39,8 +38,8 @@ for xb, yb in dev:
 acc = correct/total
 
 # 5) Save everything needed for the report
-torch.save(model.state_dict(), "artifacts/repro_training_logger.pt")
-with open("artifacts/run_meta.json","w") as f:
+torch.save(model.state_dict(), "../part_1_encoder/artifacts/repro_training_logger.pt")
+with open("../part_1_encoder/artifacts/run_meta.json", "w") as f:
     json.dump({
         "seed": SEED, "d_model": 64, "d_internal": 64, "layers": 1,
         "lr": 1e-3, "epochs": 3, "dev_acc": acc
