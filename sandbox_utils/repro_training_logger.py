@@ -5,7 +5,7 @@ from torch import nn, optim
 
 SEED = 42
 random.seed(SEED); np.random.seed(SEED); torch.manual_seed(SEED)
-os.makedirs("../artifacts", exist_ok=True); os.makedirs("../part_1_encoder/plots", exist_ok=True)
+os.makedirs("../part_1_encoder/artifacts", exist_ok=True); os.makedirs("../part_1_encoder/plots", exist_ok=True)
 
 # 1) Data
 v, idx = build_vocab_indexer()
@@ -38,8 +38,8 @@ for xb, yb in dev:
 acc = correct/total
 
 # 5) Save everything needed for the report
-torch.save(model.state_dict(), "../artifacts/repro_training_logger.pt")
-with open("../artifacts/run_meta.json", "w") as f:
+torch.save(model.state_dict(), "../part_1_encoder/artifacts/repro_training_logger.pt")
+with open("../part_1_encoder/artifacts/run_meta.json", "w") as f:
     json.dump({
         "seed": SEED, "d_model": 64, "d_internal": 64, "layers": 1,
         "lr": 1e-3, "epochs": 3, "dev_acc": acc
