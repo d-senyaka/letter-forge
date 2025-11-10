@@ -12,6 +12,7 @@ from part_1_encoder.utils import *
 
 import torch.nn.functional as F
 import math
+import os, json
 
 # Wraps an example: stores the raw input string (input), the indexed form of the string (input_indexed),
 # a tensorized version of that (input_tensor), the raw outputs (output; a numpy array) and a tensorized version
@@ -66,6 +67,11 @@ class Transformer(nn.Module):
           - attn_maps: list of [L, L] attention matrices (one per layer)
         """
         # [L] → [L, d_model]
+        assert indices.dim() == 1, f"Expected unbatched [L], got {tuple(indices.shape)}"
+        assert indices.dtype == torch.long, f"Expected LongTensor token ids, got {indices.dtype}"
+        L = indices.size(0)
+        assert L <= self.num_positions, f"Sequence length {L} exceeds PE size {self.num_positions}"
+
         x = self.char_emb(indices)
         # add positional encodings (unbatched path)
         x = self.posenc(x)  # [L, d_model]
@@ -155,20 +161,25 @@ class PositionalEncoding(nn.Module):
 
 # This is a skeleton for train_classifier: you can implement this however you want
 # ✅
-def train_classifier(args, train, dev):
+def train_classifier(args, train, dev,
+                     *, d_model=64, d_internal=64, num_layers=1,
+                     epochs=5, lr=1e-3, seed=42, save_dir="artifacts"):
     """
-    Minimal trainer for Part 1 that:
-      - builds the model
+    Robust Part-1 trainer:
       - trains with NLLLoss on unbatched examples
-      - returns the trained model (ready for decode())
+      - logs per-epoch loss + dev accuracy
+      - saves best checkpoint (by dev acc) and run metadata JSON
     """
-    # Hyperparameters (feel free to tune later)
-    d_model = 64
-    d_internal = 64
-    num_layers = 1           # try 2 later for Q2 plots/accuracy
+    # Repro
+    random.seed(seed); np.random.seed(seed); torch.manual_seed(seed)
+
+    # Spec constants for Part-1
     num_positions = 20
-    num_classes = 3
-    vocab_size = 27
+    num_classes   = 3
+    vocab_size    = 27
+
+    # Ensure output dir exists (relative to current working directory)
+    os.makedirs(save_dir, exist_ok=True)
 
     model = Transformer(
         vocab_size=vocab_size,
@@ -179,33 +190,67 @@ def train_classifier(args, train, dev):
         num_layers=num_layers
     )
 
-    optimizer = optim.Adam(model.parameters(), lr=1e-3)
-    loss_fcn = nn.NLLLoss()
+    optimizer = optim.Adam(model.parameters(), lr=lr)
+    loss_fcn  = nn.NLLLoss()
 
-    # A few fast epochs are enough to verify end-to-end training
-    num_epochs = 5
-    model.train()
-    for epoch in range(num_epochs):
-        # shuffle example indices
+    best_acc = -1.0
+    history = []
+
+    for epoch in range(1, epochs + 1):
+        model.train()
         ex_idxs = list(range(len(train)))
         random.shuffle(ex_idxs)
-        epoch_loss = 0.0
+        train_loss_epoch = 0.0
 
         for ex_i in ex_idxs:
             ex = train[ex_i]  # LetterCountingExample
-            log_probs, _ = model(ex.input_tensor)              # [L,3]
-            loss = loss_fcn(log_probs, ex.output_tensor)       # targets: [L]
+            log_probs, _ = model(ex.input_tensor)        # [L,3]
+            loss = loss_fcn(log_probs, ex.output_tensor) # targets [L]
 
             optimizer.zero_grad()
             loss.backward()
             optimizer.step()
-            epoch_loss += loss.item()
+            train_loss_epoch += loss.item()
 
-        # quick progress
-        print(f"[epoch {epoch+1}/{num_epochs}] loss={epoch_loss:.4f}")
+        # Inline dev accuracy (no helper defs)
+        model.eval()
+        correct, total = 0, 0
+        with torch.no_grad():
+            for ex in dev:
+                lp, _ = model(ex.input_tensor)           # [L,3]
+                preds = lp.argmax(dim=-1)                # [L]
+                correct += int((preds == ex.output_tensor).sum().item())
+                total   += int(ex.output_tensor.numel())
+        dev_acc = (correct / total) if total else 0.0
+
+        history.append({"epoch": epoch, "train_loss": train_loss_epoch, "dev_acc": dev_acc})
+        print(f"[epoch {epoch}/{epochs}] loss={train_loss_epoch:.4f}  dev_acc={dev_acc:.4f}")
+
+        # Save best-by-dev
+        if dev_acc > best_acc:
+            best_acc = dev_acc
+            torch.save(model.state_dict(), os.path.join(save_dir, "model_part1_best.pt"))
+
+    # Save run metadata
+    meta = {
+        "hparams": {
+            "d_model": d_model, "d_internal": d_internal, "num_layers": num_layers,
+            "epochs": epochs, "lr": lr, "seed": seed
+        },
+        "final_dev_acc": best_acc,
+        "history": history,
+    }
+    with open(os.path.join(save_dir, "run_meta_part1.json"), "w") as f:
+        json.dump(meta, f, indent=2)
+
+    best_path = os.path.join(save_dir, "model_part1_best.pt")
+    if os.path.exists(best_path):
+        model.load_state_dict(torch.load(best_path, map_location="cpu"))
 
     model.eval()
     return model
+
+
 
 
 
