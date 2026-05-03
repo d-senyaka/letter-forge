@@ -188,6 +188,14 @@ You are free to use, modify, and distribute it with attribution.
 
 ---
 
+## 📖 Documentation
+
+| Guide | Description |
+|-------|-------------|
+| [User Guide: Letter Template Creation](docs/user_guide_letter_templates.md) | Step-by-step instructions for creating and customizing letter template datasets, task modes, hyperparameter overrides, and common error fixes. |
+
+---
+
 ## ⭐ Acknowledgements
 - Inspired by open research in attention mechanisms and neural sequence modeling.  
 - Crafted with curiosity, patience, and an appreciation for both language and logic.
